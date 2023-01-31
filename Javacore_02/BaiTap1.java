@@ -1,0 +1,2 @@
+public class BaiTap1 {
+}
