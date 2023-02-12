@@ -6,7 +6,6 @@ public class bt10 {
         int[] a = nhapMang(n);
         xuatMang(a);
     }
-
     public static int nhapSo(String thongDiep) {
         System.out.print(thongDiep);
         return new Scanner(System.in).nextInt();
@@ -14,8 +13,15 @@ public class bt10 {
 
     public static int[] nhapMang(int n) {
         int[] arr = new int[n];
+        int temp=-1;
         for (int i = 0; i < arr.length; i++) {
             arr[i] = nhapSo("a[" + i + "]: ");
+            if(arr[i]==temp){
+                System.out.println("bi trung so nhap lai");
+                i--;
+            }else {
+                temp=arr[i];
+            }
         }
         return arr;
     }
