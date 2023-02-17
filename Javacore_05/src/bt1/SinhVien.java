@@ -4,11 +4,11 @@ import java.util.Scanner;
 
 public class SinhVien {
     int maSinhvien;
-    String ten;
-    String lop;
+    public String ten;
+    public String lop;
     String khoa;
 
-    public void nhapThongTin(){
+    public void nhapThongTin() {
         System.out.println("nhap ma sinh vien: ");
         this.maSinhvien = new Scanner(System.in).nextInt();
 
