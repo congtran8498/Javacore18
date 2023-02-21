@@ -56,7 +56,7 @@ public class Main {
     private static void sapXepDanhSachTheoSoLuongTuyen() {
         for (int i = 0; i < driverManagements.length - 1; i++) {
             for (int j = i + 1; j < driverManagements.length; j++) {
-                if (driverManagements[j] != null && driverManagements[i] != null){
+                if (driverManagements[j] != null && driverManagements[i] != null) {
                     if (driverManagements[i].getDriverManagementDetails().length < driverManagements[j].getDriverManagementDetails().length && driverManagements[i] != null && driverManagements[j] != null) {
                         DriverManagement temp = driverManagements[i];
                         driverManagements[i] = driverManagements[j];
@@ -85,14 +85,8 @@ public class Main {
 
     private static void danhSachPhanCong() {
         System.out.print("Số lượng tài xế muốn phân công: ");
-        int driverNumber;
-        do {
-            driverNumber = new Scanner(System.in).nextInt();
-            if (driverNumber > 0) {
-                break;
-            }
-            System.out.print("nhập sai, hãy nhập lại: ");
-        } while (true);
+        int driverNumber = validate();
+
         int idDriver1 = 0;
         for (int i = 0; i < driverNumber; i++) {
             System.out.print("Mã số của tài xế thứ " + (i + 1) + " được phân công là: ");
@@ -101,7 +95,7 @@ public class Main {
             do {
                 idDriver = new Scanner(System.in).nextInt();
                 for (int j = 0; j < drivers.length; j++) {
-                    if (drivers[j] != null && drivers[j].getIdDriver() == idDriver && idDriver1!=idDriver) {
+                    if (drivers[j] != null && drivers[j].getIdDriver() == idDriver && idDriver1 != idDriver) {
                         driver = drivers[j];
                         idDriver1 = idDriver;
                         break;
@@ -114,20 +108,13 @@ public class Main {
             } while (true);
 
             System.out.print("Nhập số tuyến muốn phân công cho tài xế thứ " + (i + 1) + " là: ");
-            int tuyenQuantity;
-            do {
-                tuyenQuantity = new Scanner(System.in).nextInt();
-                if (tuyenQuantity > 0) {
-                    break;
-                }
-                System.out.print("Nhập sai, hãy nhập lại: ");
-            } while (true);
+            int tuyenQuantity = validate();
 
             DriverManagementDetail[] phanCongTuyen = new DriverManagementDetail[tuyenQuantity];
             int count = 0;
             int tong = 0;
             int tong1 = 0;
-            int tuyenId1=0;
+            int tuyenId1 = 0;
             for (int j = 0; j < phanCongTuyen.length; j++) {
                 System.out.print("Nhập mã tuyến phân công thứ " + (j + 1) + " là: ");
                 Tuyen tuyen = null;
@@ -135,7 +122,7 @@ public class Main {
                 do {
                     tuyenId = new Scanner(System.in).nextInt();
                     for (int k = 0; k < tuyens.length; k++) {
-                        if (tuyens[k] != null && tuyens[k].getIdTuyen() == tuyenId && tuyenId1!=tuyenId) {
+                        if (tuyens[k] != null && tuyens[k].getIdTuyen() == tuyenId && tuyenId1 != tuyenId) {
                             tuyen = tuyens[k];
                             tuyenId1 = tuyenId;
                             break;
@@ -151,9 +138,9 @@ public class Main {
                 int soLuot;
                 do {
                     soLuot = new Scanner(System.in).nextInt();
-                    tong+=soLuot;
+                    tong += soLuot;
                     if (soLuot > 0 && tong <= 15) {
-                        tong1=tong;
+                        tong1 = tong;
                         break;
                     }
                     System.out.println("Nhập sai, hãy nhập lại: ");
@@ -196,14 +183,7 @@ public class Main {
 
     private static void inputTuyen() {
         System.out.print("Nhập số lượng tuyến muốn thêm vào: ");
-        int soLuongTuyen;
-        do {
-            soLuongTuyen = new Scanner(System.in).nextInt();
-            if (soLuongTuyen > 0) {
-                break;
-            }
-            System.out.print("Nhập sai, hãy nhập lại: ");
-        } while (true);
+        int soLuongTuyen = validate();
         for (int i = 0; i < soLuongTuyen; i++) {
             Tuyen tuyen = new Tuyen();
             tuyen.inputInfo();
@@ -230,19 +210,24 @@ public class Main {
 
     private static void inputDriver() {
         System.out.print("Nhập số lượng tài xế muốn thêm vào: ");
-        int driverNumber;
-        do {
-            driverNumber = new Scanner(System.in).nextInt();
-            if (driverNumber > 0) {
-                break;
-            }
-            System.out.print("nhập sai, hãy nhập lại: ");
-        } while (true);
+        int driverNumber = validate();
         for (int i = 0; i < driverNumber; i++) {
             Driver driver = new Driver();
             driver.inputInfo();
             saveDriver(driver);
         }
+    }
+
+    private static int validate() {
+        int validate;
+        do {
+            validate = new Scanner(System.in).nextInt();
+            if (validate > 0) {
+                break;
+            }
+            System.out.print("nhập sai, hãy nhập lại: ");
+        } while (true);
+        return validate;
     }
 
     private static void saveDriver(Driver driver) {
