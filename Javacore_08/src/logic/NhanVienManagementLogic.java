@@ -82,7 +82,14 @@ public class NhanVienManagementLogic {
                 System.out.println("Không có mặt hàng mã "+idMatHang+", vui lòng nhập lại: ");
             }while (true);
             System.out.println("Số lượng bán được của mặt hàng này: ");
-            int soLuongCuaMatHang = new Scanner(System.in).nextInt();
+            int soLuongCuaMatHang;
+            do {
+                soLuongCuaMatHang = new Scanner(System.in).nextInt();
+                if(soLuongCuaMatHang > 0){
+                    break;
+                }
+                System.out.println("Số lượng phải lớn hơn 0, vui lòng nhập lại: ");
+            }while (true);
             NhanVienManagementDetail details = new NhanVienManagementDetail(matHang,soLuongCuaMatHang);
             saveLoaiMatHangChiTiet(details, danhSachMatHang);
         }
