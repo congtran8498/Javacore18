@@ -12,9 +12,9 @@ public class bt2 {
         StringBuilder s1 = new StringBuilder();
         for (int i = 0; i < s.length(); i++) {
             if(i%2==0){
-                s1.append(Character.toUpperCase(s.charAt(i)));
+                s1.append(String.valueOf(s.charAt(i)).toUpperCase());
             }else {
-                s1.append(Character.toLowerCase(s.charAt(i)));
+                s1.append(String.valueOf(s.charAt(i)).toLowerCase());
             }
         }
         System.out.println(s1);
