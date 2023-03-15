@@ -83,5 +83,8 @@ public class AccountLogic {
             }
         }while (true);
         users.remove(user);
+        FileUtil<User> userFileUtil = new FileUtil<>();
+        userFileUtil.writeDataToFile("User.dat", users);
     }
+    
 }

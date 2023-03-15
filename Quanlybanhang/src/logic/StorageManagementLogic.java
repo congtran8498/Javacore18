@@ -3,6 +3,7 @@ package logic;
 import entity.Product;
 import entity.Storage;
 import entity.StorageManagement;
+import entity.StorageManagementDetail;
 import util.FileUtil;
 
 import java.util.ArrayList;
@@ -11,13 +12,14 @@ import java.util.List;
 import java.util.Scanner;
 
 public class StorageManagementLogic {
-    private StorageLogic storageLogic;
     private List<StorageManagement> storageManagements;
+    private StorageLogic storageLogic;
+    private ProductLogic productLogic;
 
-
-    public StorageManagementLogic(StorageLogic storageLogic, List<StorageManagement> storageManagements) {
-        this.storageLogic = storageLogic;
+    public StorageManagementLogic(List<StorageManagement> storageManagements, StorageLogic storageLogic, ProductLogic productLogic) {
         this.storageManagements = storageManagements;
+        this.storageLogic = storageLogic;
+        this.productLogic = productLogic;
     }
 
     public void inputProductToStorage() {
@@ -38,10 +40,12 @@ public class StorageManagementLogic {
         for (int i = 0; i < storageNumber; i++) {
             System.out.println("Nhập mã của kho hàng thứ " + (i + 1));
             Storage storage = inputStorage();
-//            List<Product> products = new ArrayList<>();
-            for (int k = 0; k < storageManagements.size(); k++) {
-                if (storage.getIdStorage() == storageManagements.get(k).getStorage().getIdStorage()) {
-                    System.out.println("Nhập bao nhiêu loại sản phẩm cho kho hàng: ");
+            boolean isExist = false;
+            for (int j = 0; j < storageManagements.size(); j++) {
+                if (storageManagements.get(j).getStorage().getIdStorage() == storage.getIdStorage()) {
+                    StorageManagement danhSachKho = storageManagements.get(j);
+                    List<StorageManagementDetail> danhSachSanPham = danhSachKho.getStorageManagementDetails();
+                    System.out.println("Nhập bao nhiêu loại sản phẩm: ");
                     int productNumber;
                     do {
                         try {
@@ -54,27 +58,57 @@ public class StorageManagementLogic {
                             System.out.println("Nhập sai định dạng, hãy nhập lại: ");
                         }
                     } while (true);
-
-
-
-
-//                    int max = storageManagements.get(k).getProducts().size();
-                    int max = 0;
-                    for (int h = 0; h < storageManagements.get(k).getProducts().size(); h++) {
-                        if (max < storageManagements.get(k).getProducts().get(h).getId()){
-                            max = storageManagements.get(k).getProducts().get(h).getId();
+                    for (int k = 0; k < productNumber; k++) {
+                        System.out.println("Nhập mã sản phẩm thứ " + (k + 1));
+                        Product product = inputProduct();
+                        boolean isExist1=false;
+                        for (int l = 0; l < danhSachSanPham.size(); l++) {
+                            if (danhSachSanPham.get(l).getProduct().getId() == product.getId()) {
+                                System.out.println("Nhập số lượng sản phẩm: ");
+                                int quantity;
+                                do {
+                                    try {
+                                        quantity = new Scanner(System.in).nextInt();
+                                        if (quantity > 0) {
+                                            break;
+                                        }
+                                        System.out.println("Số lượng phải dương, vui lòng nhập lại: ");
+                                    } catch (InputMismatchException e) {
+                                        System.out.println("Nhập sai định dạng, vui lòng nhập lại: ");
+                                    }
+                                } while (true);
+                                danhSachSanPham.get(l).setQuantity(quantity + danhSachSanPham.get(l).getQuantity());
+                                isExist1=true;
+                                break;
+                            }
                         }
+                        if(isExist1){
+                            continue;
+                        }
+                        System.out.println("Nhập số lượng sản phẩm: ");
+                        int quantity;
+                        do {
+                            try {
+                                quantity = new Scanner(System.in).nextInt();
+                                if (quantity > 0) {
+                                    break;
+                                }
+                                System.out.println("số lượng phải dương, vui lòng nhập lại: ");
+                            } catch (InputMismatchException e) {
+                                System.out.println("Nhập sai định dạng, vui lòng nhập lại: ");
+                            }
+                        } while (true);
+                        StorageManagementDetail storageManagementDetail = new StorageManagementDetail(product, quantity);
+                        danhSachSanPham.add(storageManagementDetail);
                     }
-                    for (int j = 0; j < productNumber; j++) {
-                        Product product = new Product();
-                        product.inputInfo();
-                        product.setId(++max);
-                        storageManagements.get(k).getProducts().add(product);
-                    }
-                    return;
+                    isExist = true;
+                    break;
                 }
             }
-            System.out.println("Nhập bao nhiêu loại sản phẩm cho kho hàng: ");
+            if (isExist) {
+                continue;
+            }
+            System.out.println("Nhập bao nhiêu loại sản phẩm: ");
             int productNumber;
             do {
                 try {
@@ -87,18 +121,58 @@ public class StorageManagementLogic {
                     System.out.println("Nhập sai định dạng, hãy nhập lại: ");
                 }
             } while (true);
-            int max = 0;
-            for (int j = 0; j < productNumber; j++) {
-                Product product = new Product();
-                product.inputInfo();
-                product.setId(++max);
-                products.add(product);
-            }
-            StorageManagement storageManagement = new StorageManagement(storage, products);
+            List<StorageManagementDetail> storageManagementDetails = nhapDanhSachSanPham(productNumber);
+            StorageManagement storageManagement = new StorageManagement(storage, storageManagementDetails);
             storageManagements.add(storageManagement);
         }
         FileUtil<StorageManagement> storageManagementFileUtil = new FileUtil<>();
         storageManagementFileUtil.writeDataToFile("StorageManagement.dat", storageManagements);
+    }
+
+    private List<StorageManagementDetail> nhapDanhSachSanPham(int productNumber) {
+        List<StorageManagementDetail> storageManagementDetails = new ArrayList<>();
+        for (int i = 0; i < productNumber; i++) {
+            System.out.println("Nhập mã của sản phẩm thứ " + (i + 1) + " là: ");
+            Product product = inputProduct();
+            System.out.println("Nhập số lượng sản phẩm: ");
+            int quantity;
+            do {
+                try {
+                    quantity = new Scanner(System.in).nextInt();
+                    if (quantity > 0) {
+                        break;
+                    }
+                    System.out.println("số lượng phải dương, vui lòng nhập lại: ");
+                } catch (InputMismatchException e) {
+                    System.out.println("Nhập sai định dạng, vui lòng nhập lại: ");
+                }
+            } while (true);
+            StorageManagementDetail storageManagementDetail = new StorageManagementDetail(product, quantity);
+            storageManagementDetails.add(storageManagementDetail);
+        }
+        return storageManagementDetails;
+    }
+
+    private Product inputProduct() {
+        Product product;
+        int idProduct;
+        do {
+            try {
+                idProduct = new Scanner(System.in).nextInt();
+                if (idProduct <= 0) {
+                    System.out.println("Mã sản phẩm phải dương, vui lòng nhập lại: ");
+                    continue;
+                }
+                product = productLogic.searchById(idProduct);
+                if (product != null) {
+                    break;
+                }
+                System.out.println("Không tìm thấy sản phẩm có mã " + idProduct + ",vui lòng nhập lại: ");
+            } catch (InputMismatchException e) {
+                System.out.println("Nhập sai định dạng, hãy nhập lại: ");
+            }
+        } while (true);
+        return product;
     }
 
     public void showStorageManagement() {
@@ -129,71 +203,4 @@ public class StorageManagementLogic {
         return storage;
     }
 
-    public void updateStorage() {
-        showStorageManagement();
-        System.out.println("Nhập mã kho muốn sửa: ");
-        StorageManagement storageManagement = null;
-        int idStorage;
-        do {
-            try {
-                idStorage = new Scanner(System.in).nextInt();
-                if (idStorage <= 0) {
-                    System.out.println("Mã kho hàng phải dương, vui lòng nhập lại: ");
-                    continue;
-                }
-                for (int i = 0; i < storageManagements.size(); i++) {
-                    if (storageManagements.get(i).getStorage().getIdStorage() == idStorage) {
-                        storageManagement = storageManagements.get(i);
-                        break;
-                    }
-                }
-                if (storageManagement != null) {
-                    break;
-                }
-                System.out.println("Không tìm thấy kho hàng có mã " + (idStorage) + ", vui lòng nhập lại: ");
-            } catch (InputMismatchException e) {
-                System.out.println("Nhập sai định dạng, hãy nhập lại: ");
-            }
-        } while (true);
-        System.out.println("Nhập số loại sản phẩm muốn thay đổi: ");
-        int productNumber;
-        do {
-            try {
-                productNumber = new Scanner(System.in).nextInt();
-                if (productNumber > 0 && productNumber <= storageManagement.getProducts().size()) {
-                    break;
-                }
-                System.out.println("số lượng phải dương và nhỏ hơn số loai sản phẩm trong kho, vui lòng nhập lại: ");
-            } catch (InputMismatchException e) {
-                System.out.println("Nhập sai định dạng, vui lòng nhập lại: ");
-            }
-        } while (true);
-        for (int i = 0; i < productNumber; i++) {
-            System.out.println("Nhập mã của sản phẩm thứ " + (i + 1) + " là: ");
-            int productId;
-            Product product = null;
-            do {
-                try {
-                    productId = new Scanner(System.in).nextInt();
-                    if (productId <= 0) {
-                        System.out.println("mã sản phẩm phải dương,vui lòng nhập lại: ");
-                        continue;
-                    }
-                    for (int j = 0; j < storageManagement.getProducts().size(); j++) {
-                        if (storageManagement.getProducts().get(j).getId() == productId) {
-                            product = storageManagement.getProducts().get(j);
-                            break;
-                        }
-                    }
-                    if (product != null) {
-                        break;
-                    }
-                    System.out.println("Không tìm thấy sản phẩm có mã " + productId + ", vui lòng nhập lại: ");
-                } catch (InputMismatchException e) {
-                    System.out.println("Nhập sai định dạng, vui lòng nhập lại: ");
-                }
-            } while (true);
-            product.inputInfo();
-        }
-    }
 }

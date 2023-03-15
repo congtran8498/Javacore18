@@ -10,7 +10,6 @@ public class Product implements Inputable, Serializable {
     private int id;
     private String name;
     private double price;
-    private int quantity;
     private Category category;
 
     public int getId() {
@@ -45,21 +44,12 @@ public class Product implements Inputable, Serializable {
         this.category = category;
     }
 
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
     @Override
     public String toString() {
         return "Product{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", price=" + price +
-                ", quantity=" + quantity +
                 ", category=" + category +
                 '}';
     }
@@ -70,9 +60,6 @@ public class Product implements Inputable, Serializable {
         this.name = new Scanner(System.in).nextLine();
         System.out.println("Nhập giá sản phẩm: ");
         this.price = new Scanner(System.in).nextDouble();
-        System.out.println("Nhập số lượng sản phẩm: ");
-        this.quantity = new Scanner(System.in).nextInt();
-
         System.out.println("Nhập loại sản phẩm: ");
         System.out.println("1. Quần áo hè");
         System.out.println("2. Quần áo thu đông");
