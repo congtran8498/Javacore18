@@ -1,9 +1,6 @@
 package logic;
 
-import entity.Product;
-import entity.Storage;
-import entity.StorageManagement;
-import entity.User;
+import entity.*;
 import util.FileUtil;
 
 import java.util.ArrayList;
@@ -15,6 +12,9 @@ public class MenuManagement {
     private AccountLogic accountLogic;
     private StorageLogic storageLogic;
     private ProductLogic productLogic;
+    private CategoryLogic categoryLogic;
+    private BuyLogic buyLogic;
+    private IncomeLogic incomeLogic;
 
 
     private StorageManagementLogic storageManagementLogic;
@@ -28,6 +28,11 @@ public class MenuManagement {
             accountLogic.adminAccount();
         }
 
+        FileUtil<Category> categoryFileUtil = new FileUtil<>();
+        List categoryList = categoryFileUtil.readDataFromFile("Category.dat");
+        List<Category> categories = categoryList == null ? new ArrayList<>() : (List<Category>) categoryList;
+        categoryLogic = new CategoryLogic(categories);
+
         FileUtil<Storage> storageFileUtil = new FileUtil<>();
         List storageList = storageFileUtil.readDataFromFile("Storage.dat");
         List<Storage> storages = storageList == null ? new ArrayList<>() : (List<Storage>) storageList;
@@ -36,12 +41,19 @@ public class MenuManagement {
         FileUtil<Product> productFileUtil = new FileUtil<>();
         List productList = productFileUtil.readDataFromFile("Product.dat");
         List<Product> products = productList == null ? new ArrayList<>() : (List<Product>) productList;
-        productLogic = new ProductLogic(products);
+        productLogic = new ProductLogic(products, categoryLogic);
 
         FileUtil<StorageManagement> storageManagementFileUtil = new FileUtil<>();
         List storageManagementList = storageManagementFileUtil.readDataFromFile("StorageManagement.dat");
         List<StorageManagement> storageManagements = storageManagementList == null ? new ArrayList<>() : (List<StorageManagement>) storageManagementList;
         storageManagementLogic = new StorageManagementLogic(storageManagements, storageLogic, productLogic);
+        FileUtil<Buy> buyFileUtil = new FileUtil<>();
+
+        List buyList = buyFileUtil.readDataFromFile("BuyHistory.dat");
+        List<BuyHistory> buys = buyList == null ? new ArrayList<>() : (List<BuyHistory>) buyList;
+        buyLogic = new BuyLogic(categoryLogic, productLogic, storageLogic, storageManagementLogic, buys, accountLogic);
+
+        incomeLogic = new IncomeLogic(buyLogic);
     }
 
     public void menu() {
@@ -67,28 +79,30 @@ public class MenuManagement {
 
     private void userPrintMenu() {
         while (true) {
-            System.out.println("============== Phần Mềm Quản Lý Bán Hàng ==============");
-            System.out.println("1. Sửa thông tin cá nhân");
+            System.out.println("1. Thông tin cá nhân");
             System.out.println("2. Mua hàng");
             System.out.println("3. Xem lịch sử mua hàng");
             System.out.println("4. Thoát");
             int choice;
             do {
-                try{
+                try {
                     choice = new Scanner(System.in).nextInt();
-                    if(choice>0 && choice<=4){
+                    if (choice > 0 && choice <= 4) {
                         break;
                     }
-                }catch (InputMismatchException e){
+                } catch (InputMismatchException e) {
                     System.out.println("Nhập sai định dạng, vui lòng nhập lại: ");
                 }
-            }while (true);
+            } while (true);
             switch (choice) {
                 case 1:
+                    accountLogic.updateAccount();
                     break;
                 case 2:
+                    buyLogic.buyProduct();
                     break;
                 case 3:
+                    buyLogic.showBuyList();
                     break;
                 case 4:
                     return;
@@ -125,7 +139,7 @@ public class MenuManagement {
         do {
             try {
                 choice = new Scanner(System.in).nextInt();
-                if (choice > 0 && choice <= 11) {
+                if (choice > 0 && choice <= 8) {
                     break;
                 }
                 System.out.println("Lựa chọn sai, vui lòng chọn lại");
@@ -139,50 +153,217 @@ public class MenuManagement {
     private void adminPrintMenu() {
         while (true) {
             System.out.println("============== Phần Mềm Quản Lý Bán Hàng ==============");
-            System.out.println("1. In danh sách user");
-            System.out.println("2. Xóa user");
-            System.out.println("3. Tạo kho hàng");
-            System.out.println("4. In danh sách kho hàng");
-            System.out.println("5. Tạo sản phẩm");
-            System.out.println("6. In sản phẩm");
-            System.out.println("7. Nhập sản phẩm vào kho hàng");
-            System.out.println("8. In danh sách kho hàng");
-            System.out.println("9. Sửa danh sách kho hàng");
-            System.out.println("10. Kiểm tra doanh thu");
-            System.out.println("11. Thoát");
+            System.out.println("1. Thông tin cá nhân");
+            System.out.println("2. Quản lý user");
+            System.out.println("3. Quản lý loại sản phẩm");
+            System.out.println("4. Quản lý sản phẩm");
+            System.out.println("5. Quản lý kho hàng");
+            System.out.println("6. Quản lý kho hàng và sản phẩm");
+            System.out.println("7. Kiểm tra doanh thu");
+            System.out.println("8. Thoát");
             int choice = adminChoice();
             switch (choice) {
                 case 1:
-                    accountLogic.showRegister();
+                    accountLogic.updateAccount();
                     break;
                 case 2:
-                    accountLogic.deleteUser();
+                    menuUser();
                     break;
                 case 3:
-                    storageLogic.inputStorage();
+                    menuCategory();
                     break;
                 case 4:
-                    storageLogic.showStorage();
+                    menuProduct();
                     break;
                 case 5:
-                    productLogic.inputProduct();
+                    menuStorage();
                     break;
                 case 6:
-                    productLogic.showProduct();
+                    menuStorageAndProduct();
                     break;
                 case 7:
-                    storageManagementLogic.inputProductToStorage();
+                    incomeLogic.income();
                     break;
                 case 8:
-                    storageManagementLogic.showStorageManagement();
-                    break;
-                case 9:
-                    break;
-                case 10:
-                    break;
-                case 11:
                     return;
             }
+        }
+    }
+
+    private void menuStorageAndProduct() {
+        System.out.println("1. Thêm sản phẩm vào kho");
+        System.out.println("2. Xóa kho hàng");
+        System.out.println("3. Xóa sản phẩm trong kho");
+        System.out.println("4. Danh sách tồn kho");
+        System.out.println("5. Quay lại");
+        int choice;
+        do {
+            try {
+                choice = new Scanner(System.in).nextInt();
+                if (choice > 0 && choice <= 5) {
+                    break;
+                }
+                System.out.println("Lựa chọn sai, hãy chọn lại: ");
+            } catch (InputMismatchException e) {
+                System.out.println("Nhập sai định dạng, vui lòng nhập lại: ");
+            }
+        } while (true);
+        switch (choice) {
+            case 1:
+                storageManagementLogic.inputProductToStorage();
+                menuStorageAndProduct();
+                break;
+            case 2:
+                storageManagementLogic.deleteStorage();
+                menuStorageAndProduct();
+                break;
+            case 3:
+                storageManagementLogic.deleteProductFromStorage();
+                menuStorageAndProduct();
+                break;
+            case 4:
+                storageManagementLogic.showStorageManagement();
+                menuStorageAndProduct();
+                break;
+        }
+    }
+
+    public void menuUser() {
+        System.out.println("1. Danh sách user");
+        System.out.println("2. Xóa user");
+        System.out.println("3. Quay lại");
+        int choice;
+        do {
+            try {
+                choice = new Scanner(System.in).nextInt();
+                if (choice > 0 && choice <= 3) {
+                    break;
+                }
+                System.out.println("Lựa chọn sai, hãy chọn lại: ");
+            } catch (InputMismatchException e) {
+                System.out.println("Nhập sai định dạng, vui lòng nhập lại: ");
+            }
+        } while (true);
+        if (choice == 1) {
+            accountLogic.showRegister();
+            menuUser();
+        } else if (choice == 2) {
+            accountLogic.deleteUser();
+            menuUser();
+        }
+    }
+
+    public void menuCategory() {
+        System.out.println("1. Thêm loại sản phẩm");
+        System.out.println("2. Sửa loại sản phẩm");
+        System.out.println("3. Xóa loại sản phẩm");
+        System.out.println("4. Danh sách loại sản phẩm");
+        System.out.println("5. Quay lại");
+        int choice;
+        do {
+            try {
+                choice = new Scanner(System.in).nextInt();
+                if (choice > 0 && choice <= 5) {
+                    break;
+                }
+                System.out.println("Lựa chọn sai, hãy chọn lại: ");
+            } catch (InputMismatchException e) {
+                System.out.println("Nhập sai định dạng, vui lòng nhập lại: ");
+            }
+        } while (true);
+        switch (choice) {
+            case 1:
+                categoryLogic.inputCategory();
+                menuCategory();
+                break;
+            case 2:
+                categoryLogic.updateCategory();
+                menuCategory();
+                break;
+            case 3:
+                categoryLogic.deleteCategory();
+                menuCategory();
+                break;
+            case 4:
+                categoryLogic.showCategory();
+                menuCategory();
+                break;
+        }
+    }
+
+    public void menuProduct() {
+        System.out.println("1. Thêm sản phẩm");
+        System.out.println("2. Sửa sản phẩm");
+        System.out.println("3. Xóa sản phẩm");
+        System.out.println("4. Danh sách sản phẩm");
+        System.out.println("5. Quay lại");
+        int choice;
+        do {
+            try {
+                choice = new Scanner(System.in).nextInt();
+                if (choice > 0 && choice <= 5) {
+                    break;
+                }
+                System.out.println("Lựa chọn sai, hãy chọn lại: ");
+            } catch (InputMismatchException e) {
+                System.out.println("Nhập sai định dạng, vui lòng nhập lại: ");
+            }
+        } while (true);
+        switch (choice) {
+            case 1:
+                productLogic.inputProduct();
+                menuProduct();
+                break;
+            case 2:
+                productLogic.updateProduct();
+                menuProduct();
+                break;
+            case 3:
+                productLogic.deleteProduct();
+                menuProduct();
+                break;
+            case 4:
+                productLogic.showProduct();
+                menuProduct();
+                break;
+        }
+    }
+
+    public void menuStorage() {
+        System.out.println("1. Thêm kho hàng");
+        System.out.println("2. Sửa kho hàng");
+        System.out.println("3. Xóa kho hàng");
+        System.out.println("4. Danh sách kho hàng");
+        System.out.println("5. Quay lại");
+        int choice;
+        do {
+            try {
+                choice = new Scanner(System.in).nextInt();
+                if (choice > 0 && choice <= 5) {
+                    break;
+                }
+                System.out.println("Lựa chọn sai, hãy chọn lại: ");
+            } catch (InputMismatchException e) {
+                System.out.println("Nhập sai định dạng, vui lòng nhập lại: ");
+            }
+        } while (true);
+        switch (choice) {
+            case 1:
+                storageLogic.inputStorage();
+                menuStorage();
+                break;
+            case 2:
+                storageLogic.updateStorage();
+                menuStorage();
+                break;
+            case 3:
+                storageLogic.deleteStorage();
+                menuStorage();
+                break;
+            case 4:
+                storageLogic.showStorage();
+                menuStorage();
+                break;
         }
     }
 }

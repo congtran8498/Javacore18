@@ -1,5 +1,6 @@
 package logic;
 
+import entity.Product;
 import entity.Storage;
 import util.FileUtil;
 
@@ -11,6 +12,14 @@ public class StorageLogic {
     private List<Storage> storages;
 
     public StorageLogic(List<Storage> storages) {
+        this.storages = storages;
+    }
+
+    public List<Storage> getStorages() {
+        return storages;
+    }
+
+    public void setStorages(List<Storage> storages) {
         this.storages = storages;
     }
 
@@ -48,6 +57,10 @@ public class StorageLogic {
     }
 
     public void showStorage() {
+        if(storages.size() == 0){
+            System.out.println("Danh sách trống");
+            return;
+        }
         for (Storage s : storages) {
             System.out.println(s);
         }
@@ -62,5 +75,40 @@ public class StorageLogic {
             }
         }
         return storage;
+    }
+    public Storage findStorage() {
+        Storage storage;
+        int idStorage;
+        do {
+            try {
+                idStorage = new Scanner(System.in).nextInt();
+                if (idStorage <= 0) {
+                    System.out.println("Mã kho phải dương, vui lòng nhập lại: ");
+                    continue;
+                }
+                storage = searchById(idStorage);
+                if (storage != null) {
+                    break;
+                }
+                System.out.println("Không tìm thấy kho có mã " + idStorage + ",vui lòng nhập lại: ");
+            } catch (InputMismatchException e) {
+                System.out.println("Nhập sai định dạng, hãy nhập lại: ");
+            }
+        } while (true);
+        return storage;
+    }
+    public void updateStorage(){
+        System.out.println("Nhập mã kho muốn sửa: ");
+        Storage storage = findStorage();
+        storage.inputInfo();
+        FileUtil<Storage> storageFileUtil = new FileUtil<>();
+        storageFileUtil.writeDataToFile("Storage.dat", storages);
+    }
+    public void deleteStorage(){
+        System.out.println("Nhập mã kho muốn xóa: ");
+        Storage storage = findStorage();
+        storages.remove(storage);
+        FileUtil<Storage> storageFileUtil = new FileUtil<>();
+        storageFileUtil.writeDataToFile("Storage.dat", storages);
     }
 }

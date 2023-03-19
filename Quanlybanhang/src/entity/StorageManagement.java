@@ -35,4 +35,5 @@ public class StorageManagement implements Serializable {
                 ", storageManagementDetails=" + storageManagementDetails +
                 '}';
     }
+
 }
